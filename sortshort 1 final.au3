@@ -1,6 +1,6 @@
 #NoTrayIcon
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=..\..\Users\GRAZIANI\Pictures\icon_sortshort.ico
+#AutoIt3Wrapper_Icon=..\..\..\Pictures\icon_sortshort.ico
 #AutoIt3Wrapper_Outfile=Sortshortx86.exe
 #AutoIt3Wrapper_Outfile_x64=sortshortx64.exe
 #AutoIt3Wrapper_Compile_Both=y
