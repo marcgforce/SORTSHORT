@@ -726,7 +726,8 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 						_charger_combo()
 					Else
 						$flag = "iconbutton"
-						valider_guiquestion()
+						iconbutton()
+						GUISwitch($ui)
 					EndIf
 			EndSwitch
 
@@ -780,7 +781,7 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
                 IniWrite($filelink,$section,"icone",@ScriptDir & "\Assets\" & $reponse & ".ico")
 				_charger_combo()
 			ElseIf $iconToPlaceOn <> "" Then
-				_DebugPrint("Filextention" & @CRLF & "-->extension :" & @TAB & $iconToPlaceOn)
+				_DebugPrint("CASE DRAG AND DROP FAIS LIEN" & @CRLF & "-->extension :" & @TAB & $iconToPlaceOn)
 				switch $iconToPlaceOn
 					Case "WordIcon"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",436")
@@ -804,8 +805,10 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",221")
 						_charger_combo()
 					Case "unknow"
+						;uncheckall()
 						$flag = "iconbutton"
-						valider_guiquestion()
+						iconbutton()
+						GUISwitch($ui)
 
 				EndSwitch
 			EndIf
@@ -1245,10 +1248,18 @@ func uncheckall() ; permet de deselectionner tous les items de la gui_question
 	GUICtrlSetState($checkbox_dossier,$GUI_UNCHECKED)
 	GUICtrlSetState($checkbox_moveto,$GUI_UNCHECKED)
 	GUICtrlSetState($combo_GuiQuestion, $GUI_DISABLE)
+	_DebugPrint("UNCHECKALL" & @CRLF & "-->Fichier :" & _IsChecked($checkbox_Fichier) & @CRLF & _
+				"-->Dossier" & @TAB & _IsChecked($checkbox_dossier) & @crlf & _
+				"-->Suppr" & @TAB & _IsChecked($checkbox_nothing) & @CRLF & _
+				"-->Icone" & @tab & _IsChecked($Checkbox_icone) & @crlf & _
+				"-->Internet" & @TAB & _IsChecked($checkbox_internet) & @CRLF & _
+				"-->Deplacement" & @TAB & _IsChecked($checkbox_moveto))
 EndFunc
 
 func valider_guiquestion(); permet de valider la selection de la gui_question
+	_DebugPrint("Valider_guiquestion" & @CRLF & "-->$flag " & $flag)
 	if _IsChecked($checkbox_Fichier) or _IsChecked($checkbox_dossier) or _IsChecked($checkbox_internet) or _IsChecked($checkbox_nothing) or _IsChecked($Checkbox_icone) or _IsChecked($checkbox_moveto) Then
+		_DebugPrint("Valider_guiquestion" & @CRLF & "-->ALL CHECKBOX OFF ")
 		if $flag ="iconbutton" then
 			iconbutton()
 			GUISetState(@SW_HIDE, $gui_question)
