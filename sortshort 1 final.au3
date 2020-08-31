@@ -39,7 +39,7 @@ DirCreate($sFilePath)
 $assets = @ScriptDir & "\Assets\"
 $sysdll = @WindowsDir & "\System32\"
 $now = @HOUR & ":" & @MIN
-$version="V 5.0"
+$version="V 1.0"
 $ui_width = 826
 $ui_height = 474
 $left_margin = 20
@@ -67,7 +67,6 @@ Global $anavilinks ; tableau 2d du fichier link en cours d'utilisation
 Global $flag, $flagbutton, $flagbouton
 Global $filelink
 Global $clic_combo = 0 ; variable (0,1) qui permet de detecter un clic dans la combobox (à épurer)
-Global $first_launch = True
 Global $IconButton ; l'icone selectionné dans la GUI incone
 Global $GuiIcon ; la GUI icone est intergrée à une fonction et detruite lorsqu'elle ne sers plus
 Global $section ; id du bouton dans le fichier ini
@@ -1396,8 +1395,3 @@ Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam) ; gère le clic sur la combobox
     EndSwitch
     Return $GUI_RUNDEFMSG
 EndFunc   ;==>WM_COMMAND
-
-
-
-
-
