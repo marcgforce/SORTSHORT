@@ -767,7 +767,7 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 				Return
 			EndIf
 			iniwrite($filelink,$section,"label",$reponse)
-			IniWrite($filelink,$section,"link", $link_DnD) ; le raccourcis mis en place pointe directement vers le fichier
+			IniWrite($filelink,$section,"link", $choose) ; le raccourcis mis en place pointe directement vers le fichier
 			if _WinAPI_ExtractIconEx( $link_DnD,-1,0,0,0) > 0 Then ; permet de tester si le fichier possède une ou plusiers icone(s); on teste pour voir si il y a une icone dans le fichier
 				Local $aIcon[3] = [64, 32, 16]; si oui
 				For $i = 0 To UBound($aIcon) - 1
