@@ -1,6 +1,6 @@
 #NoTrayIcon
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=..\..\..\Pictures\icon_sortshort.ico
+#AutoIt3Wrapper_Icon=icon_sortshort.ico
 #AutoIt3Wrapper_Outfile=Sortshortx86.exe
 #AutoIt3Wrapper_Outfile_x64=sortshortx64.exe
 #AutoIt3Wrapper_Compile_Both=y
@@ -17,6 +17,7 @@
 
 Opt("GUIOnEventMode", 1)
 opt("MouseClickDragDelay",10)
+AutoItSetOption ("ExpandEnvStrings", 1)
 
 #include <Array.au3>
 #include <ButtonConstants.au3>
@@ -33,6 +34,8 @@ opt("MouseClickDragDelay",10)
 #include <WinAPIRes.au3>
 #include <WindowsConstants.au3>
 #include <WinAPISysWin.au3>
+#include <StructureConstants.au3>
+#include <WinAPI.au3>
 
 Local Const $sFilePath = @ScriptDir & "\Assets"
 DirCreate($sFilePath)
@@ -76,6 +79,7 @@ Global $richedit_content
 Global $g_hCursor = _WinAPI_LoadCursorFromFile($sFilePath & "\cursor.cur")
 Global $ReadComboGuiQuestion
 Global $title_GuiQuestion = ""
+Global $iconLnk
 
 ;~ creation de la gui d'initialisation = image en base 64 dans le code
 $logoUi = GUICreate("",640,200, Default, Default, $WS_POPUP) ; sans bordures
@@ -200,6 +204,7 @@ Next
 $x = $left_margin+2 ; fabrication de la gui principale
 $y = $top_margin+2
 $iconID = 0
+;_ArrayDisplay($anavilinks)
 For $i=0 to 3; remplissage de la GUI avec les icones et labels
 	For $j = 0 To 7
 		$box = GUICtrlCreateLabel("", $x, $y, 96, 96) ; taille du label situé sous l'icone
@@ -211,7 +216,7 @@ For $i=0 to 3; remplissage de la GUI avec les icones et labels
 			$iconCtrl[0][$iconID] = GUICtrlCreateIcon($icon_new[1],number($icon_new[2]), $x+16, $y+16, 64, 64) ; creation de l'icone en taille 64
 			GUICtrlSetTip($iconCtrl[0][$iconID],$LinkNames[$iconID+1], $labelNames[$iconID+1]) ; au passage de la souris on donne les infos sur l'icone
 		Elseif $icon_ico[0] >1 Then ;
-			$iconCtrl[0][$iconID] = GUICtrlCreateIcon($icon_ico[1] & "." & $icon_ico[2], default, $x+16, $y+16, 64, 64) ; si c'est un fichier ico le traitement est different
+			$iconCtrl[0][$iconID] = GUICtrlCreateIcon($iconNames[$iconID+1], default, $x+16, $y+16, 64, 64) ; si c'est un fichier ico le traitement est different
 			if $iconCtrl[0][$iconID] = 0 then $iconCtrl[0][$iconID] = GUICtrlCreateIcon($dll_icones_system, 327, $x+16, $y+16, 64, 64)
 			GUICtrlSetTip($iconCtrl[0][$iconID],$LinkNames[$iconID+1], $labelNames[$iconID+1])
 		Else
@@ -261,7 +266,7 @@ $icon_GuiQuestion = GUICtrlCreateIcon($dll_icones_system,80, 250,10, 64, 64)
 
 WinSetTrans($ui, Default, 0); set transparent to 0
 GUISetState(@SW_SHOW, $ui); show GUI (but unvisible)
-_GUI_Incones() ; la gui icone est crée en arrière plan également
+;_GUI_Incones() ; la gui icone est crée en arrière plan également
 _WinAPI_DeleteObject($Bmp_Logo) ; debut de suppression de la GUI d'initalisation
 _GDIPlus_Shutdown() ; on quitte la ressource GDI dont on a plus besoin
 _Transparent("show", $ui); on affiche la principale
@@ -364,7 +369,7 @@ func _charger_combo()
 				GUICtrlSetImage($iconCtrl[0][$iconID],$icon_new[1],Number($icon_new[2]), 1)
 				GUICtrlSetTip($iconCtrl[0][$iconID],$LinkNames[$iconID+1], $labelNames[$iconID+1])
 			Elseif $icon_ico[0] > 1 Then
-				Local $image = GUICtrlSetImage($iconCtrl[0][$iconID],$icon_ico[1] & "." & $icon_ico[2])
+				Local $image = GUICtrlSetImage($iconCtrl[0][$iconID],$iconNames[$iconID+1])
 				if $image = 0 then GUICtrlSetImage($iconCtrl[0][$iconID],$dll_icones_system,327)
 				GUICtrlSetTip($iconCtrl[0][$iconID],$LinkNames[$iconID+1], $labelNames[$iconID+1])
 			Else
@@ -532,13 +537,12 @@ Func ClickDroitCandidat() ; zen cas de clic droit
 			$section =$flagbouton
 			$title_GuiQuestion = "Modification du lien..."
 			WinSetTitle($gui_question,"",$title_GuiQuestion)
-			consolewrite($anavilinks[$i+1][3])
 			$icon_new = StringSplit($anavilinks[$i+1][3],",")
 			$icon_ico = StringSplit($anavilinks[$i+1][3],".")
 			if $icon_new[0] > 1 Then
 				GUICtrlSetImage($icon_GuiQuestion,$icon_new[1],Number($icon_new[2]), 1)
 			Elseif $icon_ico[0] > 1 Then
-				Local $image = GUICtrlSetImage($icon_GuiQuestion , $icon_ico[1] & "." & $icon_ico[2])
+				Local $image = GUICtrlSetImage($icon_GuiQuestion , $anavilinks[$i+1][3])
 				if $image = 0 then GUICtrlSetImage($icon_GuiQuestion,$dll_icones_system,327)
 			EndIf
 			WinSetTrans($ui, Default, 160 )
@@ -549,6 +553,7 @@ Func ClickDroitCandidat() ; zen cas de clic droit
 	Next
 EndFunc   ;==>ClickDroitCandidat
 
+#cs
 func clicicone() ; fonction de la gui icones, permet de selectionner une icone
 	global $Icon = GUICtrlRead(@GUI_CtrlId)
 	$image = GUICtrlSetImage($IconButton, $dll_icones_new, $Icon)
@@ -560,6 +565,7 @@ func close_iconset() ; fermeture de la gui de selection d'une icone
 	GUISetState(@SW_HIDE,$GuiIcon)
 	GUISwitch($ui)
 EndFunc
+#ce
 
 func close_hyperlinkGui() ; fermeture de la gui de selection d'une icone
 	_GUICtrlRichEdit_Destroy($hRichEdit)
@@ -596,8 +602,9 @@ func dropped() ; gestion du drag and drop
 							$link_dropped = @GUI_DragFile ; utilisé pour le label de l'icone dans faislien
 							Local $alink_DnD = FileGetShortcut($link_DnD) ; on retouve le fichier source du raccourcis déposé
 							$link_DnD = $alink_DnD[0] ; dans un tableau a l'idex 0
-							_DebugPrint("Fichier Lnk dropped" & @CRLF & "-->Fichier :" & @TAB & $alink_DnD[0] & @CRLF & _
-										"Répertoire de travail :" & @TAB & $alink_DnD[1])
+							$iconLnk = $alink_DnD[4]
+							;if $iconLnk == "" then $iconLnk = $alink_DnD[0]
+							$iconToPlaceOn = "LnkFile"
 						Else
 							$link_DnD = @GUI_DragFile
 							$link_dropped = @GUI_DragFile
@@ -678,12 +685,24 @@ EndFunc
 Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 	Switch $lien
 		Case "fichier" ; le lien est un fichier selectionné via fileopendialog()
-			$choose = FileOpenDialog("Selectionner un fichier",@DesktopCommonDir ,"tous les fichiers (*.*)"); gestion de la selection du fichier
+			$afile = _WinAPI_GetOpenFileName("Selectionner un fichier", _
+                        "Tous les fichiers (*.*)", ".", @DesktopCommonDir, "", 1, _
+                        BitOR($OFN_NODEREFERENCELINKS, $OFN_EXPLORER), 0, $ui) ;$OFN_NOCHANGEDIR
+			If @error Or $afile[0] = 0 Then
+				Return
+			Else
+				;_arraydisplay($afile)
+				$choose = $afile[1] & "\" & $afile[2]
+			EndIf
+
+			;$choose = FileOpenDialog("Selectionner un fichier",@DesktopCommonDir ,"tous les fichiers (*.*)"); gestion de la selection du fichier
 			if @error  <> 0 then Return
 			$ProposeLink = stringsplit($choose,"\")
-			$ProposeLink = StringRegExpReplace($ProposeLink[UBound($ProposeLink)-1], '(.*)\..*', "$1")
+			$ProposeLink = StringRegExpReplace($ProposeLink[UBound($ProposeLink) - 1] , '(.*)\..*', "$1")
 			$reponse = InputBox("Nom de l'icone","Donnez un titre à l'icone !",$ProposeLink); quel label aura le raccourcis
-			if @error == 1 or $reponse = "" or _Check_LabelForbidden($reponse) <> 0 Then ; si le nom de fichier contient des caractères interdits
+			if @error == 1 or $reponse = "" Then
+				Return
+			ElseIf _Check_LabelForbidden($reponse) <> 0 Then ; si le nom de fichier contient des caractères interdits
 				msgbox (64,"SortShort " & $version, "Erreur, vous ne pouvez pas mettre ce Label :" & $reponse,2)
 				Return
 			EndIf
@@ -712,6 +731,17 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 					_charger_combo()
 
 				Case Else
+					if $sExt = "lnk" Then
+						$program = FileGetShortcut($choose)
+						if IsArray($program) Then
+							$choose = $program[0]
+							if $program[4]<>"" then
+								iniwrite($filelink,$section,"icone",$program[4])
+								_charger_combo()
+								Return
+							EndIf
+						EndIf
+					EndIf
 					if _WinAPI_ExtractIconEx( $choose,-1,0,0,0) > 0 Then ; permet de tester si le fichier possède une ou plusiers icone(s)
 						Local $aIcon[3] = [64, 32, 16]
 						For $i = 0 To UBound($aIcon) - 1
@@ -722,11 +752,19 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 							_WinAPI_DestroyIcon($aIcon[$i])
 						Next
 						IniWrite($filelink,$section,"icone",@ScriptDir & "\Assets\" & $reponse & ".ico"); si oui écriture dans le fichier
-						_charger_combo()
+						;_charger_combo()
 					Else
-						$flag = "iconbutton"
-						iconbutton()
-						GUISwitch($ui)
+						$aRet = _PickIconDlg($dll_icones)
+						If Not @error Then
+							IniWrite($filelink,$section,"icone",$aRet[0] & "," & $aRet[1])
+						Else
+							iniwrite($filelink,$section,"link","")
+							Iniwrite($filelink,$section,"label","")
+							Return
+						EndIf
+						;$flag = "iconbutton"
+						;iconbutton()
+						;GUISwitch($ui)
 					EndIf
 			EndSwitch
 
@@ -742,7 +780,7 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 			iniwrite($filelink,$section,"label",$reponse)
 			IniWrite($filelink,$section,"link", $choose)
 			IniWrite($filelink,$section,"icone",$dll_icones_system &",153")
-			_charger_combo()
+			;_charger_combo()
 
 		Case "internet" ; le lien hyperlink
 			_GUI_hyperlink()
@@ -751,65 +789,90 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 			$suppr = msgbox(1,"SortShort " & $version,"Etes vous sur de vouloir supprimer cette tuile ?")
 			if $suppr == 2  then Return
 			Local $lect_icone = IniRead($filelink, $section,"icone","Erreur")
-			if StringRegExpReplace($lect_icone, "^.*\.", "") = "ico" then FileDelete($lect_icone); supression de la ressource inutilisée
+			if StringRegExpReplace($lect_icone, "^.*\.", "") = "ico" and StringInStr($lect_icone,"Assets") then _
+			FileDelete($lect_icone); supression de la ressource inutilisée
 			iniwrite($filelink,$section,"label","Libre")
 			IniWrite($filelink,$section,"link", "")
 			IniWrite($filelink, $section,"icone","")
-			_charger_combo()
+			;_charger_combo()
 
 		Case "Drag_n_Drop" ; lien créé via glisser déposer
 			$choose = $link_dropped ; le fichier lnk
+			$sExt =  StringRegExpReplace($choose, "^.*\.", "")
 			$ProposeLink = stringsplit($choose,"\")
 			$ProposeLink = StringRegExpReplace($ProposeLink[UBound($ProposeLink)-1], '(.*)\..*', "$1") ; on choisis le nom du fichier en proposition
 			$reponse = InputBox("Nom du lien","Donnez un titre au lien que vous venez de poser !",$ProposeLink)
-            if @error == 1 or $reponse = "" or _Check_LabelForbidden($reponse) <> 0 Then ; si le nom de fichier contient des caractères interdits
+            if @error == 1 or $reponse = "" Then
+				Return
+			ElseIf _Check_LabelForbidden($reponse) <> 0 Then ; si le nom de fichier contient des caractères interdits
 				msgbox (64,"SortShort " & $version, "Erreur, vous ne pouvez pas mettre ce Label :" & $reponse,2)
 				Return
 			EndIf
 			iniwrite($filelink,$section,"label",$reponse)
 			IniWrite($filelink,$section,"link", $choose) ; le raccourcis mis en place pointe directement vers le fichier
-			if _WinAPI_ExtractIconEx( $link_DnD,-1,0,0,0) > 0 Then ; permet de tester si le fichier possède une ou plusiers icone(s); on teste pour voir si il y a une icone dans le fichier
-				Local $aIcon[3] = [64, 32, 16]; si oui
-				For $i = 0 To UBound($aIcon) - 1
-					$aIcon[$i] = _WinAPI_Create32BitHICON(_WinAPI_ShellExtractIcon($link_DnD,0, $aIcon[$i], $aIcon[$i]), 1)
-				Next
-				_WinAPI_SaveHICONToFile(@ScriptDir & "\Assets\" & $reponse & ".ico", $aIcon) ; elle est extraite en fichier ico et sauvegardé dans le répertoire assets
-				For $i = 0 To UBound($aIcon) - 1
-					_WinAPI_DestroyIcon($aIcon[$i])
-				Next
-                IniWrite($filelink,$section,"icone",@ScriptDir & "\Assets\" & $reponse & ".ico")
-				_charger_combo()
-			ElseIf $iconToPlaceOn <> "" Then
+
+			If $iconToPlaceOn <> "" Then
 				_DebugPrint("CASE DRAG AND DROP FAIS LIEN" & @CRLF & "-->extension :" & @TAB & $iconToPlaceOn)
 				switch $iconToPlaceOn
 					Case "WordIcon"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",436")
-						_charger_combo()
+						;_charger_combo()
 					Case "ExcelIcon"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",441")
-						_charger_combo()
+						;_charger_combo()
 					Case "PdfIcon"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",400")
-						_charger_combo()
+						;_charger_combo()
 					case "PowerPtIcon"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",431")
-						_charger_combo()
+						;_charger_combo()
 					Case "TxtIcon"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",406")
-						_charger_combo()
+						;_charger_combo()
 					Case "IsAFolder"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",153")
-						_charger_combo()
+						;_charger_combo()
 					Case "IsWebPage"
 						IniWrite($filelink,$section,"icone",$dll_icones_system &",221")
-						_charger_combo()
+						;_charger_combo()
+					Case "LnkFile"
+						if _WinAPI_ExtractIconEx($link_DnD,-1,0,0,0) > 0  and $iconLnk == "" Then ; permet de tester si le fichier possède une ou plusiers icone(s); on teste pour voir si il y a une icone dans le fichier
+							Local $aIcon[3] = [64, 32, 16]; si oui
+							For $i = 0 To UBound($aIcon) - 1
+								$aIcon[$i] = _WinAPI_Create32BitHICON(_WinAPI_ShellExtractIcon($link_DnD,0, $aIcon[$i], $aIcon[$i]), 1)
+							Next
+							_WinAPI_SaveHICONToFile(@ScriptDir & "\Assets\" & $reponse & ".ico", $aIcon) ; elle est extraite en fichier ico et sauvegardé dans le répertoire assets
+							For $i = 0 To UBound($aIcon) - 1
+								_WinAPI_DestroyIcon($aIcon[$i])
+							Next
+							IniWrite($filelink,$section,"icone",@ScriptDir & "\Assets\" & $reponse & ".ico")
+						Else
+							IniWrite($filelink,$section,"icone",$iconLnk)
+						EndIf
 					Case "unknow"
-						;uncheckall()
-						$flag = "iconbutton"
-						iconbutton()
-						GUISwitch($ui)
+						if _WinAPI_ExtractIconEx( $link_DnD,-1,0,0,0) > 0 Then ; permet de tester si le fichier possède une ou plusiers icone(s); on teste pour voir si il y a une icone dans le fichier
+							Local $aIcon[3] = [64, 32, 16]; si oui
+							For $i = 0 To UBound($aIcon) - 1
+								$aIcon[$i] = _WinAPI_Create32BitHICON(_WinAPI_ShellExtractIcon($link_DnD,0, $aIcon[$i], $aIcon[$i]), 1)
+							Next
+							_WinAPI_SaveHICONToFile(@ScriptDir & "\Assets\" & $reponse & ".ico", $aIcon) ; elle est extraite en fichier ico et sauvegardé dans le répertoire assets
+							For $i = 0 To UBound($aIcon) - 1
+								_WinAPI_DestroyIcon($aIcon[$i])
+							Next
 
+							IniWrite($filelink,$section,"icone",@ScriptDir & "\Assets\" & $reponse & ".ico")
+						Else
+							$aRet = _PickIconDlg($dll_icones)
+							If Not @error Then
+								IniWrite($filelink,$section,"icone",$aRet[0] & "," & $aRet[1])
+							Else
+								iniwrite($filelink,$section,"link","")
+								Iniwrite($filelink,$section,"label","")
+								Return
+							EndIf
+						EndIf
 				EndSwitch
+				;_charger_combo()
 			EndIf
 		Case "MoveTo"
 			Local $selection, $flagbouton_destination , $FlagMvt = False
@@ -844,7 +907,7 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 				iniwrite($filelink,$flagbouton,"link","")
 				iniwrite($filelink,$flagbouton,"icone","")
 
-				_charger_combo()
+				;_charger_combo()
 			EndIf
 			_DebugPrint("Moveto" & @CRLF & "--> id selectionné:" & @TAB & $flagbouton & @crlf & _
 						"LISTE SOURCE :" & @TAB & $filelink & @CRLF & _
@@ -853,8 +916,9 @@ Func Faislien($section,$lien="",$iconToPlaceOn="") ; permet de créer les liens
 	EndSwitch
 	$lien=""
 	$iconToPlaceOn=""
+	_charger_combo()
 EndFunc
-
+#cs
 Func _Find_icon() ; bouton de la gui_icone qui permet de selectionner un autre fichier contenant une ou des icones
 	GUISetState(@SW_HIDE, $GuiIcon)
 	$result = FileOpenDialog("Choisir un fichier",@HomeDrive,"Fichiers dll (*.dll)| Fichier icône (*.ico;*.exe)",1)
@@ -903,6 +967,7 @@ Func _Find_icon() ; bouton de la gui_icone qui permet de selectionner un autre f
 	EndSwitch
 EndFunc
 
+
 ;---------------------------GUI ICONES------------------------------------------------
 Func _GUI_Incones($file = $dll_icones) ; la gui_icone va changer en fonction du nombre d'icones à affichier
 	Global $dll_icones_new = $file
@@ -942,6 +1007,8 @@ Func _GUI_Incones($file = $dll_icones) ; la gui_icone va changer en fonction du 
 	$dll_icones = $dll_icones_system
 EndFunc
 ;----------------------------------GUI ICONES------------------------------------------------
+#ce
+
 Func _GUI_hyperlink()
 	$hGUI_hypelink = GUICreate("SortShort " & $version, 650, 120, -1, 100, -1, $WS_EX_TOPMOST)
 	GUISetOnEvent($GUI_EVENT_CLOSE,"close_hyperlinkGui")
@@ -957,10 +1024,10 @@ EndFunc
 
 func iconbutton() ; affiche la gui qui permet de selectionner une icone
 	;_GUI_Incones()
-	GUISwitch($GuiIcon)
-	GUISetState(@SW_SHOW, $GuiIcon)
-	_DebugPrint("GUI ICONES" & @CRLF)
-	GUISetOnEvent($GUI_EVENT_CLOSE, "close_iconset")
+	;GUISwitch($GuiIcon)
+	;GUISetState(@SW_SHOW, $GuiIcon)
+	;_DebugPrint("GUI ICONES" & @CRLF)
+	;GUISetOnEvent($GUI_EVENT_CLOSE, "close_iconset")
 EndFunc
 
 Func initialize_logo()
@@ -1129,6 +1196,21 @@ Func _MoveTile() ; en cas d'appuie sur CTRL + clic permet de bouger les tuiles
 	GUICtrlSetState($checkbox_moveto,$GUI_ENABLE)
 EndFunc
 
+Func _PickIconDlg($sFileName, $nIconIndex=0, $hWnd=0)
+    Local $nRet, $aRetArr[2]
+
+    $nRet = DllCall("shell32.dll", "int", "PickIconDlg", _
+        "hwnd", $hWnd, _
+        "wstr", $sFileName, "int", 1000, "int*", $nIconIndex)
+
+    If Not $nRet[0] Then Return SetError(1, 0, -1)
+
+    $aRetArr[0] = $nRet[2]
+    $aRetArr[1] = $nRet[4] + 1
+
+    Return $aRetArr
+EndFunc
+
 func quitter()
 	;SplashTextOn ( "SortShort " & $version, "Bye bye :p",180, 60, -1, -1, 4, "", 24)
 	_logo_exit()
@@ -1260,7 +1342,16 @@ func valider_guiquestion(); permet de valider la selection de la gui_question
 	if _IsChecked($checkbox_Fichier) or _IsChecked($checkbox_dossier) or _IsChecked($checkbox_internet) or _IsChecked($checkbox_nothing) or _IsChecked($Checkbox_icone) or _IsChecked($checkbox_moveto) Then
 		_DebugPrint("Valider_guiquestion" & @CRLF & "-->ALL CHECKBOX OFF ")
 		if $flag ="iconbutton" then
-			iconbutton()
+			Local $lect_old_icon = IniRead($filelink,$flagbouton,"icone","Erreur")
+			$aRet = _PickIconDlg($dll_icones)
+			If Not @error Then
+				IniWrite($filelink,$section,"icone",$aRet[0] & "," & $aRet[1])
+				_charger_combo()
+				if StringRegExpReplace($lect_old_icon, "^.*\.", "") = "ico" then FileDelete($lect_old_icon); supression de la ressource inutilisée
+			Else
+				Return
+			EndIf
+			;iconbutton()
 			GUISetState(@SW_HIDE, $gui_question)
 			WinSetTrans($ui,Default,255)
 			GUISwitch($ui)
@@ -1276,6 +1367,7 @@ func valider_guiquestion(); permet de valider la selection de la gui_question
 	EndIf
 EndFunc
 
+#cs
 func validericone() ;fonction de la gui icones, valide la selection
 	Local $lect_old_icon = IniRead($filelink,$flagbouton,"icone","Erreur")
 	if StringRegExpReplace($lect_old_icon, "^.*\.", "") = "ico" then FileDelete($lect_old_icon); supression de la ressource inutilisée
@@ -1285,6 +1377,7 @@ func validericone() ;fonction de la gui icones, valide la selection
 	_GUI_Incones()
 	GUISwitch($ui)
 EndFunc
+#ce
 
 Func _WinAPI_LZNTDecompress(ByRef $tInput, ByRef $tOutput, $iBufferSize = 0x800000)
     Local $tBuffer, $Ret
